@@ -6,9 +6,9 @@
     <!-- Android 13+ -->
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
     <application
-        android:label="flyer_controler"
+        android:label="Flyerbot"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         android:enableOnBackInvokedCallback="true"
         <activity
             android:name=".MainActivity"
