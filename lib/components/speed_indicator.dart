@@ -25,23 +25,28 @@ class SpeedIndicator extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Column(
-          children: List.generate(20, (index) {
-            return Column(
-              children: [
-                Container(
-                  width: blockWidth,
-                  height: blockWidth*0.5,
-                  margin: EdgeInsets.only(top: blockSpacing),
-                  decoration: BoxDecoration(
-                    color: index+1 > 20 - filledBlocks ? filledColor : unfilledColor,
-                  ),
-                ),
-              ],
-            );
-          }),
+          children: List.generate(20, (index) => Container(
+            width: blockWidth,
+            height: blockWidth * 0.5,
+            margin: EdgeInsets.only(top: blockSpacing),
+            decoration: BoxDecoration(
+              color: index + 1 > 20 - filledBlocks ? filledColor : unfilledColor,
+            ),
+          )),
         ),
-        Text('${speed}%',
-          style: TextStyle(fontSize: 15),),
+        Container(
+          width: blockWidth,
+          height: Theme.of(context).textTheme.titleLarge?.fontSize ?? 20,
+          alignment: Alignment.center,
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            child: Text(
+              '$speed%',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+          ),
+        ),
       ],
     );
   }

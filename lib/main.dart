@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'utilities/app_theme.dart';
+import 'services/theme_notifier.dart';
 import 'screens/control_screen.dart';
 
 void main() async {
@@ -15,14 +18,20 @@ class WingControllerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flyer Controller',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
+    return ChangeNotifierProvider<ThemeNotifier>(
+      create: (_) => ThemeNotifier(),
+      child: Consumer<ThemeNotifier>(
+        builder: (context, themeNotifier, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Flyer Controller',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeNotifier.themeMode,
+            home: const ControlScreen(),
+          );
+        },
       ),
-      home: const ControlScreen(),
     );
   }
 }

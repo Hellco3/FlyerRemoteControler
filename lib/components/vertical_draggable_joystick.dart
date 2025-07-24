@@ -7,14 +7,23 @@ import 'package:flyer_controler/utilities/rc_sender.dart';
 class VerticalDraggableJoystick extends BaseDraggableJoystick {
   final void Function(double dy)? onChanged;
 
-  const VerticalDraggableJoystick({
+  VerticalDraggableJoystick({
     super.key,
     double width = 65,
     double height = 200,
+    super.stickRadius = 30,
     super.baseColor = const Color(0xFFF0F0F0),
     super.stickColor = Colors.blueAccent,
     this.onChanged,
-  }) : super(width: width, height: height);
+    super.isReboundEnabled = false,
+  }) : super(
+          width: width,
+          height: height,
+          initialStickOffset: Offset(
+            0,
+            (height / 2) - stickRadius,
+          ),
+        );
 
   @override
   Offset limitOffset(Offset offset, double maxOffset) {
@@ -27,7 +36,7 @@ class VerticalDraggableJoystick extends BaseDraggableJoystick {
   }
 
   @override
-  Widget buildBase(double width, double height, double stickRadius) {
+  Widget buildBase(BuildContext context, double width, double height, double stickRadius) {
     return Stack(
       children: [
         // 圆角矩形底座
@@ -40,7 +49,7 @@ class VerticalDraggableJoystick extends BaseDraggableJoystick {
             borderRadius: BorderRadius.circular(width * 0.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black12,
+                color: Theme.of(context).shadowColor,
                 blurRadius: 4,
                 offset: Offset(0, 2),
               ),
@@ -52,14 +61,14 @@ class VerticalDraggableJoystick extends BaseDraggableJoystick {
           top: 8,
           left: 0,
           right: 0,
-          child: Icon(Icons.keyboard_arrow_up, color: Colors.blueAccent, size: stickRadius * 1.2),
+          child: Icon(Icons.keyboard_arrow_up, size: stickRadius * 1.2),
         ),
         // 底部向下箭头
         Positioned(
           bottom: 8,
           left: 0,
           right: 0,
-          child: Icon(Icons.keyboard_arrow_down, color: Colors.blueAccent, size: stickRadius * 1.2),
+          child: Icon(Icons.keyboard_arrow_down, size: stickRadius * 1.2),
         ),
       ],
     );
@@ -67,10 +76,7 @@ class VerticalDraggableJoystick extends BaseDraggableJoystick {
 
   @override
   void onStickChanged(Offset offset, double maxOffset) {
-    final double dyRatio = (offset.dy / maxOffset).clamp(-1.0, 1.0);
+    final double dyRatio = ((offset.dy / maxOffset).clamp(-1.0, 1.0) + 1) / 2;
     onChanged?.call(dyRatio);
-    // RC通道范围映射 1000~2000
-    int ch2 = (1500 + dyRatio * 500).clamp(1000, 2000).toInt();
-    RcSender.updateChannel(2, ch2);
   }
 } 

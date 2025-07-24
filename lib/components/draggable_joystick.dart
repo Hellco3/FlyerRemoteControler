@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'base_draggable_joystick.dart';
-import 'dart:math';
 import 'package:flyer_controler/utilities/rc_sender.dart';
 
 /// 可拖动的圆形摇杆组件，允许x/y方向移动
@@ -26,8 +25,7 @@ class DraggableJoystick extends BaseDraggableJoystick {
   }
 
   @override
-  Widget buildBase(double width, double height, double stickRadius) {
-    print('width: $width, height: $height, stickRadius: $stickRadius');
+  Widget buildBase(BuildContext context, double width, double height, double stickRadius) {
     return Container(
       width: width * 0.8,
       height: height * 0.8,
@@ -36,7 +34,7 @@ class DraggableJoystick extends BaseDraggableJoystick {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: Theme.of(context).shadowColor,
             blurRadius: 4,
             offset: Offset(0, 2),
           ),
@@ -50,10 +48,5 @@ class DraggableJoystick extends BaseDraggableJoystick {
     final double dxRatio = (offset.dx / maxOffset).clamp(-1.0, 1.0);
     final double dyRatio = (offset.dy / maxOffset).clamp(-1.0, 1.0);
     onChanged?.call(dxRatio, dyRatio);
-    // RC通道范围映射 1000~2000
-    int ch0 = (1500 + dxRatio * 500).clamp(1000, 2000).toInt();
-    int ch1 = (1500 + dyRatio * 500).clamp(1000, 2000).toInt();
-    RcSender.updateChannel(0, ch0);
-    RcSender.updateChannel(1, ch1);
   }
 } 

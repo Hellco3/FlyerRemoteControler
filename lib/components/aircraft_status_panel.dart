@@ -18,20 +18,20 @@ class AircraftStatus {
   final double angleOffset; // 控制器角度偏移
 
   const AircraftStatus({
-    required this.batteryVoltage,
-    required this.batteryCurrent,
-    required this.controlMode,
-    required this.totalSpeed,
-    required this.roll,
-    required this.pitch,
-    required this.yaw,
-    this.x,
-    this.y,
-    this.z,
-    required this.flapFrequency,
-    required this.flapAmplitude,
-    required this.pValue,
-    required this.angleOffset,
+    this.batteryVoltage = 0,
+    this.batteryCurrent = 0,
+    this.controlMode = '状态未知',
+    this.totalSpeed = 0,
+    this.roll = 0,
+    this.pitch = 0,
+    this.yaw = 0,
+    this.x = 0,
+    this.y = 0,
+    this.z = 0,
+    this.flapFrequency = 0,
+    this.flapAmplitude = 0,
+    this.pValue = 0,
+    this.angleOffset = 0,
   });
 }
 
@@ -70,7 +70,7 @@ class AircraftStatusPanel extends StatelessWidget {
                 if (status.x != null && status.y != null && status.z != null)
                   _buildRow('位置 ', '(${status.x!.toStringAsFixed(2)}, ${status.y!.toStringAsFixed(2)}, ${status.z!.toStringAsFixed(2)})'),
                 _buildRow('扑动频率 ', '${status.flapFrequency.toStringAsFixed(2)} Hz'),
-                _buildRow('扑动幅度 ', '${status.flapAmplitude.toStringAsFixed(2)}'),
+                _buildRow('扑动幅度 ', status.flapAmplitude.toStringAsFixed(2)),
                 _buildRow('P值 ', status.pValue.toStringAsFixed(2)),
                 _buildRow('角度偏移 ', status.angleOffset.toStringAsFixed(2)),
               ],
@@ -88,7 +88,7 @@ class AircraftStatusPanel extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
           Text(value),
         ],
       ),

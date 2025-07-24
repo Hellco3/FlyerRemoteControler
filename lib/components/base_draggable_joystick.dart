@@ -8,6 +8,8 @@ abstract class BaseDraggableJoystick extends StatefulWidget {
   final Color baseColor;
   final Color stickColor;
   final double stickRadius;
+  final bool isReboundEnabled;
+  final Offset? initialStickOffset;
 
   const BaseDraggableJoystick({
     super.key,
@@ -17,6 +19,8 @@ abstract class BaseDraggableJoystick extends StatefulWidget {
     required this.baseColor,
     required this.stickColor,
     this.stickRadius = 30,
+    this.isReboundEnabled = true,
+    this.initialStickOffset,
   })  : width = width ?? size,
         height = height ?? size;
 
@@ -24,7 +28,7 @@ abstract class BaseDraggableJoystick extends StatefulWidget {
   Offset limitOffset(Offset offset, double maxOffset);
 
   /// 构建底座
-  Widget buildBase(double width, double height, double stickRadius);
+  Widget buildBase(BuildContext context, double width, double height, double stickRadius);
 
   /// 处理回调参数
   void onStickChanged(Offset offset, double maxOffset);
@@ -34,10 +38,20 @@ abstract class BaseDraggableJoystick extends StatefulWidget {
 }
 
 class _BaseDraggableJoystickState extends State<BaseDraggableJoystick> {
-  Offset stickOffset = Offset.zero;
+  late Offset stickOffset;
+
+  double? _lastDxRatio;
+  double? _lastDyRatio;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    stickOffset = widget.initialStickOffset ?? Offset.zero;
+  }
 
   void _updateStick(Offset localPosition) {
-    final double radius = widget.width / 2;
     final double maxOffset = (widget.height / 2) - widget.stickRadius;
     final Offset center = Offset(widget.width / 2, widget.height / 2);
     Offset offset = localPosition - center;
@@ -45,7 +59,16 @@ class _BaseDraggableJoystickState extends State<BaseDraggableJoystick> {
     setState(() {
       stickOffset = offset;
     });
-    widget.onStickChanged(Offset(offset.dx, -offset.dy), maxOffset);
+    final double dx = offset.dx;
+    final double dy = offset.dy;
+    final bool dxChanged = _lastDxRatio == null || (dx - _lastDxRatio!).abs() > 1e-6;
+    final bool dyChanged = _lastDyRatio == null || (dy - _lastDyRatio!).abs() > 1e-6;
+
+    if (dxChanged || dyChanged) {
+      _lastDxRatio = dx;
+      _lastDyRatio = dy;
+      widget.onStickChanged(Offset(dx, -dy), maxOffset);
+    }
   }
 
   void _resetStick() {
@@ -66,7 +89,9 @@ class _BaseDraggableJoystickState extends State<BaseDraggableJoystick> {
         _updateStick(details.localPosition);
       },
       onPanEnd: (_) {
-        _resetStick();
+        if (widget.isReboundEnabled) {
+          _resetStick();
+        }
       },
       child: SizedBox(
         width: widget.width,
@@ -74,7 +99,7 @@ class _BaseDraggableJoystickState extends State<BaseDraggableJoystick> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            widget.buildBase(widget.width, widget.height, widget.stickRadius),
+            widget.buildBase(context, widget.width, widget.height, widget.stickRadius),
             Transform.translate(
               offset: limitedOffset,
               child: buildStick(widget.stickRadius),

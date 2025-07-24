@@ -20,45 +20,49 @@ class ControlAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final appBarTheme = Theme.of(context).appBarTheme;
+
+    return Container(
+      color: appBarTheme.backgroundColor, // 背景色
+      child: IconTheme(
+        data: appBarTheme.iconTheme ?? const IconThemeData(),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(width: 12),
-                IconButton(
-                  onPressed: onMenu,
-                  icon: Icon(Icons.menu),
+                Row(
+                  children: [
+                    const SizedBox(width: 12),
+                    IconButton(
+                      onPressed: onMenu,
+                      icon: Icon(Icons.menu), // 自动用主题色
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: onWifi,
+                      icon: Icon(Icons.wifi, color: wifiIconColor), // 单独指定颜色
+                    ),
+                    IconButton(
+                      onPressed: onSettings,
+                      icon: Icon(Icons.settings), // 自动用主题色
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                 ),
               ],
             ),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: onWifi,
-                  icon: Icon(Icons.wifi, color: wifiIconColor),
-                ),
-                IconButton(
-                  onPressed: onSettings,
-                  icon: const Icon(Icons.settings),
-                ),
-                const SizedBox(width: 12),
-              ],
+            Text(
+              'Wing Control',
+              style: appBarTheme.titleTextStyle, // 标题字体和颜色
             ),
           ],
         ),
-        const Text(
-          'Wing Control',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-      ],
+      ),
     );
   }
 } 

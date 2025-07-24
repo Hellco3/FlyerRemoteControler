@@ -10,6 +10,14 @@ class RcSender {
 
   /// 初始化UDP
   static Future<void> init() async {
+    _channels[0] = 1500;
+    _channels[1] = 1500;
+    _channels[2] = 1500;
+    _channels[3] = 1500;
+    _channels[4] = 1000;
+    _channels[5] = 1200;
+    _channels[6] = 1000;
+    _channels[7] = 1100;
     _udp ??= await UDP.bind(Endpoint.any());
   }
 
@@ -21,7 +29,9 @@ class RcSender {
 
   /// 更新通道数据并发送
   static Future<void> sendChannels(List<int> channels) async {
-    await init();
+    if (_udp == null) {
+      await init();
+    }
     _channels = List.from(channels);
     final packet = Uint8List(20);
     final byteData = ByteData.sublistView(packet);
@@ -39,6 +49,16 @@ class RcSender {
   /// 只更新某个通道并发送
   static Future<void> updateChannel(int index, int value) async {
     _channels[index] = value;
+    print('updateChannel: $index, $value');
+    await sendChannels(_channels);
+  }
+
+  static void setChannel(int index, int value) {
+    _channels[index] = value;
+    print('setChannel: $index, $value');
+  }
+
+  static Future<void> send() async {
     await sendChannels(_channels);
   }
 

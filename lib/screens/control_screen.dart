@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flyer_controler/components/device_scan_dialog.dart';
-import 'package:flyer_controler/components/press_button.dart';
 import 'package:flyer_controler/components/draggable_joystick.dart';
 import 'package:flyer_controler/components/vertical_draggable_joystick.dart';
 import 'package:flyer_controler/components/angle_indicator.dart';
 import 'package:flyer_controler/components/speed_indicator.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:app_settings/app_settings.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flyer_controler/components/aircraft_status_panel.dart';
 import 'package:flyer_controler/components/control_app_bar.dart';
 import 'package:flyer_controler/utilities/rc_sender.dart';
 import 'package:flyer_controler/utilities/constants.dart';
+import 'package:flyer_controler/screens/settings_screen.dart';
 
 class ControlScreen extends StatefulWidget {
   const ControlScreen({super.key});
@@ -25,6 +24,8 @@ class _ControlScreenState extends State<ControlScreen> {
   double horizontalValue = 0.5;
   double semiCircleAngle = 90;
   bool isUdpConnected = false;
+  double speedRadio = 0;
+  AircraftStatus aircraftStatus = AircraftStatus();
 
   void increaseVertical() {
     setState(() {
@@ -69,35 +70,57 @@ class _ControlScreenState extends State<ControlScreen> {
       );
       if (selectedDevice != null) {
         RcSender.setTarget(selectedDevice.ip, selectedDevice.port ?? 8888);
+        print('连接到设备：${selectedDevice.ip}:${selectedDevice.port}');
         setState(() {
           isUdpConnected = true;
         });
       }
     }
   }
-
-  void _onRightJoystickChanged(double dx, double dy) {
-    print('右摇杆偏移：$dx, $dy');
-    RcSender.updateChannel(0, (2008 + dx * 500).clamp(1000, 2000).toInt());
-    RcSender.updateChannel(1, (1500 + dy * 500).clamp(1000, 2000).toInt());
+  
+  void _onSettingsButtonPressed(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+    );
   }
 
   void _onLeftJoystickChanged(double dy) {
     print('左摇杆偏移：$dy');
-    RcSender.updateChannel(3, (1500 + dy * 500).clamp(1000, 2000).toInt());
+    // 通道3：左手油门，范围 990~2011，中值1500
+    final int ch3 = (900 + dy * (2011 - 900)).clamp(900, 2011).toInt();
+    RcSender.updateChannel(2, ch3);
+    setState(() {
+      speedRadio = dy;
+    });
   }
+
+  void _onRightJoystickChanged(double dx, double dy) {
+    print('右摇杆偏移：$dx, $dy');
+    // 通道1：右手左右，范围 992~2011，中值1500
+    final int ch1 = (1500 + dx * (2011 - 1500)).clamp(992, 2011).toInt();
+    // 通道2：右手上下，范围 994~2011，中值1500
+    final int ch2 = (1500 + dy * (2011 - 1500)).clamp(994, 2011).toInt();
+    RcSender.setChannel(0, ch1);
+    RcSender.setChannel(1, ch2);
+    RcSender.send();
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: ControlAppBar(
         onMenu: () {},
         onWifi: () {
           _onWifiButtonPressed(context);
         },
-        onSettings: () {},
-        wifiIconColor: isUdpConnected ? iconStyle.color : Colors.grey,
+        onSettings: () {
+          _onSettingsButtonPressed(context);
+        },
+        wifiIconColor: isUdpConnected ? theme.colorScheme.primary : theme.disabledColor,
       ),
-      backgroundColor: const Color(0xFFF7F7FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,11 +136,15 @@ class _ControlScreenState extends State<ControlScreen> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     VerticalDraggableJoystick(
-                      onChanged: (dy) { print('左摇杆偏移：$dy');},
+                      onChanged: _onLeftJoystickChanged,
+                      baseColor: theme.colorScheme.surface,
+                      stickColor: theme.colorScheme.primary,
                     ),
                     SizedBox(width: 12),
                     SpeedIndicator(
-                      progress: 0,
+                      progress: speedRadio,
+                      filledColor: theme.colorScheme.primary,
+                      unfilledColor: theme.disabledColor,
                     ),
                   ],
                 ),
@@ -133,22 +160,7 @@ class _ControlScreenState extends State<ControlScreen> {
                   maxWidth: 320,
                 ),
                 child: AircraftStatusPanel(
-                  status: AircraftStatus(
-                    batteryVoltage: 11.1,
-                    batteryCurrent: 2.3,
-                    controlMode: '自动飞行',
-                    totalSpeed: 5.6,
-                    roll: 2.1,
-                    pitch: -1.3,
-                    yaw: 45.0,
-                    x: 1.2,
-                    y: 3.4,
-                    z: 0.8,
-                    flapFrequency: 12.5,
-                    flapAmplitude: 0.7,
-                    pValue: 0.85,
-                    angleOffset: 1.2,
-                  ),
+                  status: aircraftStatus,
                 ),
               ),
             ),
@@ -163,7 +175,9 @@ class _ControlScreenState extends State<ControlScreen> {
                     children: [
                       AngleIndicator(initialAngle: 90,),
                       DraggableJoystick(
-                        onChanged: (dx, dy) { print('右摇杆偏移：$dx, $dy');},
+                        onChanged: _onRightJoystickChanged,
+                        baseColor: theme.colorScheme.surface,
+                        stickColor: theme.colorScheme.primary,
                       ),
                     ]
                   ),
