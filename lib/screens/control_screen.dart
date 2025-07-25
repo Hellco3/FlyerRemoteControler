@@ -70,7 +70,10 @@ class _ControlScreenState extends State<ControlScreen> {
       );
       if (selectedDevice != null) {
         RcSender.setTarget(selectedDevice.ip, selectedDevice.port ?? 8888);
-        print('连接到设备：${selectedDevice.ip}:${selectedDevice.port}');
+        assert(() {
+          debugPrint('连接到设备：${selectedDevice.ip}:${selectedDevice.port}');
+          return true;
+        }());
         setState(() {
           isUdpConnected = true;
         });
@@ -85,7 +88,7 @@ class _ControlScreenState extends State<ControlScreen> {
   }
 
   void _onLeftJoystickChanged(double dy) {
-    print('左摇杆偏移：$dy');
+    debugPrint('左摇杆偏移：$dy');
     // 通道3：左手油门，范围 990~2011，中值1500
     final int ch3 = (900 + dy * (2011 - 900)).clamp(900, 2011).toInt();
     RcSender.updateChannel(2, ch3);
@@ -95,7 +98,7 @@ class _ControlScreenState extends State<ControlScreen> {
   }
 
   void _onRightJoystickChanged(double dx, double dy) {
-    print('右摇杆偏移：$dx, $dy');
+    debugPrint('右摇杆偏移：$dx, $dy');
     // 通道1：右手左右，范围 992~2011，中值1500
     final int ch1 = (1500 + dx * (2011 - 1500)).clamp(992, 2011).toInt();
     // 通道2：右手上下，范围 994~2011，中值1500

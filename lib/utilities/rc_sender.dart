@@ -49,13 +49,11 @@ class RcSender {
   /// 只更新某个通道并发送
   static Future<void> updateChannel(int index, int value) async {
     _channels[index] = value;
-    print('updateChannel: $index, $value');
     await sendChannels(_channels);
   }
 
   static void setChannel(int index, int value) {
     _channels[index] = value;
-    print('setChannel: $index, $value');
   }
 
   static Future<void> send() async {
