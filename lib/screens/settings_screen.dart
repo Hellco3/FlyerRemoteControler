@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flyer_controler/utilities/constants.dart';
 import 'package:flyer_controler/services/theme_notifier.dart';
 
 /// 设置页面

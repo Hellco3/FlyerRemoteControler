@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'base_draggable_joystick.dart';
-import 'package:flyer_controler/utilities/rc_sender.dart';
 
 /// 只能上下移动的虚拟摇杆组件
 /// onChanged 回调参数为 dy（相对于底座圆心的y方向偏移比例，范围-1~1）

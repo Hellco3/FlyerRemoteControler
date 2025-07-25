@@ -9,7 +9,6 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flyer_controler/components/aircraft_status_panel.dart';
 import 'package:flyer_controler/components/control_app_bar.dart';
 import 'package:flyer_controler/utilities/rc_sender.dart';
-import 'package:flyer_controler/utilities/constants.dart';
 import 'package:flyer_controler/screens/settings_screen.dart';
 
 class ControlScreen extends StatefulWidget {
